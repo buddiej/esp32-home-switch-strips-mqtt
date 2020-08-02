@@ -592,15 +592,15 @@ void Strip_Program_01_Handle(void)
 
 	// calculate the average:
 	average = total / numReadings;
-    // Serial.println(average);
 
-    Serial.println(map(peakToPeak, 1, 400  , 0, 255));
+  // Serial.println(average);
+  //Serial.println(map(peakToPeak, 1, 400  , 0, 255));
   
-    for(int j = 0; j < NUM_LEDS; j++)
-    {
-       leds[j] = CHSV(map(average, 200, 1500, 0, 150), 255,  map(peakToPeak, 1, 400, 0, 255));
-    }
-    FastLED.show();	
+  for(int j = 0; j < NUM_LEDS; j++)
+  {
+     leds[j] = CHSV(map(average, 200, 1500, 0, 150), 255,  map(peakToPeak, 1, 400, 0, 255));
+  }
+  FastLED.show();	
 }
 
 /**************************************************************************************************
