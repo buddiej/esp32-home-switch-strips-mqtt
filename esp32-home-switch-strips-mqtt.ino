@@ -104,7 +104,6 @@ unsigned int sampling_period_us;
 unsigned long microseconds;
 double vReal[SAMPLES];
 double vImag[SAMPLES];
-//HSV colorLED[150];    ///???
 HSV colorLED[NUM_LEDS];
 HSV black;
 /* END Strip Program 1 (using Microphone with FFT) */
@@ -281,7 +280,7 @@ void receivedCallback(char* topic, byte* payload, unsigned int length)
   /********************************************************************************************/
   
   /*+++++++++++++++++++++++++++++ Set Strip's +++++++++++++++++++++++++++++++++++++++*/ 
-   if(strcmp(topic, TOPIC_STRIP_1_PROGRAM_ALL_SET_ON)==0)
+  if(strcmp(topic, TOPIC_STRIP_1_PROGRAM_ALL_SET_ON)==0)
   {
     if(root.containsKey("status")) 
     {
@@ -477,6 +476,7 @@ return: void
 **************************************************************************************************/
 void Strip_Program_01_Handle(void)
 {
+    /* music with microphone */
     //volume
     unsigned long startMillis= millis();  // Start of sample window
     unsigned int peakToPeak = 0;   // peak-to-peak level
