@@ -32,7 +32,7 @@
 
 
 /* Send topics */
-#define TOPIC_STRIP_1_PROGRAM_1_GET_ON        "wz/strip_1/program_2/get/on"
+#define TOPIC_STRIP_1_STATUS_GET_ON           "wz/strip_1/status/get/on"
 
 /* LED STRIPS */
 #define NUM_LEDS 100
@@ -279,14 +279,21 @@ void loop()
     char data[MQTT_PAYLOAD_MAX];
     String json; 
        
-  
-    char temp[8];
-    char humidity[8];
-    //dtostrf(Dht.heat_index,  6, 2, temp);
-    //dtostrf(Dht.humidity, 6, 2, humidity);
-    json = "{\"temperature\":" + String(temp) + ",\"humidity\":" + String(humidity) + "}";
+
+    int temp;
+    char Status[8];
+
+    if(StripProgram == STRIP_PROGRAM_OFF) /* is the strip OFF? */
+    {temp = 0;}
+    else
+    {temp = 1;}
+
+    dtostrf(temp,  1, 0, Status);
+    json = "{\"status\":" + String(Status) + "}";
     json.toCharArray(data, (json.length() + 1));
-    client.publish(TOPIC_STRIP_1_PROGRAM_1_GET_ON, data, false);
+
+
+    client.publish(TOPIC_STRIP_1_STATUS_GET_ON, data, false);
 
   }
 
