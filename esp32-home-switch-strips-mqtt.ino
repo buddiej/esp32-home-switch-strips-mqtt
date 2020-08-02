@@ -7,7 +7,7 @@
 #include "FastLED.h" 
 #include "arduinoFFT.h"
 
-
+#include "_authentification.h"  /* credentials for WIFI and mqtt. Located in libraries folder */
 
 
 /*****************************************************************************************/
