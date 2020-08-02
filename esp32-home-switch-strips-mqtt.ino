@@ -26,7 +26,6 @@
 #define MQTT_PAYLOAD_MAX 120
 
 /* Receive topics */
-#define TOPIC_STRIP_1_PROGRAM_ALL_SET_ON      "wz/strip_1/program_all/set/on"
 #define TOPIC_STRIP_1_PROGRAM_1_SET_ON        "wz/strip_1/program_1/set/on"
 #define TOPIC_STRIP_1_PROGRAM_2_SET_ON        "wz/strip_1/program_2/set/on"
 #define TOPIC_STRIP_1_PROGRAM_3_SET_ON        "wz/strip_1/program_3/set/on"
@@ -53,8 +52,7 @@ typedef enum
   STRIP_PROGRAM_OFF = 0,
   STRIP_PROGRAM_01,
   STRIP_PROGRAM_02,
-  STRIP_PROGRAM_03,
-  STRIP_PROGRAM_04
+  STRIP_PROGRAM_03
 }T_STRIP_PROGRAM;
 
 
@@ -334,23 +332,6 @@ void receivedCallback(char* topic, byte* payload, unsigned int length)
   /********************************************************************************************/
   
   /*+++++++++++++++++++++++++++++ Set Strip's +++++++++++++++++++++++++++++++++++++++*/ 
-  if(strcmp(topic, TOPIC_STRIP_1_PROGRAM_ALL_SET_ON)==0)
-  {
-    if(root.containsKey("status")) 
-    {
-      Loc_Status = root["status"];
-      Serial.print("status strip 1 program all set:");
-      Serial.println(Loc_Status, DEC);
-      if(Loc_Status == 1)
-      {
-         StripProgram = STRIP_PROGRAM_OFF;
-      }
-      else
-      {
-         StripProgram = STRIP_PROGRAM_OFF;
-      }
-    }
-  }
   if(strcmp(topic, TOPIC_STRIP_1_PROGRAM_1_SET_ON)==0)
   {
     if(root.containsKey("status")) 
@@ -375,67 +356,60 @@ void receivedCallback(char* topic, byte* payload, unsigned int length)
       Loc_Status = root["status"];
       Serial.print("status strip 1 program 2 set:");
       Serial.println(Loc_Status, DEC);
-      switch (Loc_Status)
+      if(Loc_Status == 1)
       {
-        case 0: //set off
-          StripProgram = STRIP_PROGRAM_OFF; 
-        break;
-        case 1: //set white on
-          StripProgram = STRIP_PROGRAM_02;
-        break;
-        case 2: 
-          color_format.hue = root["hue"];
-          color_format.sat = root["saturation"];
-          color_format.val = root["brightness"];
-          Serial.print("hue: ");
-          Serial.print(color_format.hue);
-          Serial.print("\t sat: ");
-          Serial.print(color_format.sat);
-          Serial.print("\t val: ");
-          Serial.println(color_format.val);
+        color_format.hue = root["hue"];
+        color_format.sat = root["saturation"];
+        color_format.val = root["brightness"];
+        Serial.print("hue: ");
+        Serial.print(color_format.hue);
+        Serial.print("\t sat: ");
+        Serial.print(color_format.sat);
+        Serial.print("\t val: ");
+        Serial.println(color_format.val);
 
-          StripProgram = STRIP_PROGRAM_04;
-        break;
-        default:
-        break;
+        StripProgram = STRIP_PROGRAM_02;
       }
+      else
+      {
+         StripProgram = STRIP_PROGRAM_OFF;
+      }
+
     }
   }
   if(strcmp(topic, TOPIC_STRIP_1_PROGRAM_3_SET_ON)==0)
   {
-    Serial.print("status strip 1 program 3 set:");
-
-//fill_solid(leds, NUM_LEDS /*number of leds*/, 0xFF44DD); 
+    if(root.containsKey("status")) 
+    {
+      Loc_Status = root["status"];
+      Serial.print("status strip 1 program 3 set:");
+      Serial.println(Loc_Status, DEC);
+      if(Loc_Status == 1)
+      {
+        // Get rid of '#' and convert it to integer
+        const char* PtrColor = root.get<char*>("color"); // template version of get()
+        long number = strtol( PtrColor, NULL, 16);
+        //Serial.println(number);
+        // Split them up into r, g, b values
+        Color_Val_R = number >> 16;
+        Color_Val_G = number >> 8 & 0xFF;
+        Color_Val_B = number & 0xFF;
     
-    // Get rid of '#' and convert it to integer
-    //long number = strtol( &payload_buff[1], NULL, 16);
-   const char* PtrColor = root.get<char*>("color"); // template version of get()
-   long number = strtol( PtrColor, NULL, 16);
-   //Serial.println(number);
-// Split them up into r, g, b values
-    Color_Val_R = number >> 16;
-    Color_Val_G = number >> 8 & 0xFF;
-    Color_Val_B = number & 0xFF;
-    // String below causes issues
-    // String value = String((char*)payload_buff);
-    // split string at every "," and store in proper variable
-    // convert final result to integer
-    /*
-    valueR = value.substring(0,value.indexOf(',')).toInt();
-    valueG = value.substring(value.indexOf(',')+1,value.lastIndexOf(',')).toInt();
-    valueB = value.substring(value.lastIndexOf(',')+1).toInt();
-    */
+        Serial.print("red: ");
+        Serial.print(Color_Val_R);
+        Serial.print("\t green: ");
+        Serial.print(Color_Val_G);
+        Serial.print("\t blue: ");
+        Serial.println(Color_Val_B);
 
-    StripProgram = STRIP_PROGRAM_03;
-    Serial.print("red: ");
-    Serial.print(Color_Val_R);
-    Serial.print("\t green: ");
-    Serial.print(Color_Val_G);
-    Serial.print("\t blue: ");
-    Serial.println(Color_Val_B);
- 
+        StripProgram = STRIP_PROGRAM_03;
+      }
+      else
+      {
+        StripProgram = STRIP_PROGRAM_OFF;
+      }
+    }
   }
-
 }
 
 /**************************************************************************************************
@@ -456,7 +430,6 @@ void mqttconnect(void)
     {
       Serial.println("connected");
       /* subscribe topic's */
-	    client.subscribe(TOPIC_STRIP_1_PROGRAM_ALL_SET_ON);
       client.subscribe(TOPIC_STRIP_1_PROGRAM_1_SET_ON);
       client.subscribe(TOPIC_STRIP_1_PROGRAM_2_SET_ON);
       client.subscribe(TOPIC_STRIP_1_PROGRAM_3_SET_ON);
@@ -500,9 +473,6 @@ void Strip_Program_Cyclic(void)
     case STRIP_PROGRAM_03:
       Strip_Program_03_Handle();
     break;
-    case STRIP_PROGRAM_04:
-      Strip_Program_04_Handle();
-    break;
 		default:
 		break;
 		
@@ -524,13 +494,12 @@ void Strip_Program_Off_Handle(void)
 }
 
 /**************************************************************************************************
-Function: Strip_Program_01_Handle()
+Function: Strip_Program_01_Handle()  (music detection with microphone)
 Argument: void
 return: void
 **************************************************************************************************/
 void Strip_Program_01_Handle(void)
 {
-    /* music with microphone */
     //volume
     unsigned long startMillis= millis();  // Start of sample window
     unsigned int peakToPeak = 0;   // peak-to-peak level
@@ -594,7 +563,7 @@ void Strip_Program_01_Handle(void)
 	average = total / numReadings;
 
   // Serial.println(average);
-  //Serial.println(map(peakToPeak, 1, 400  , 0, 255));
+  // Serial.println(map(peakToPeak, 1, 400  , 0, 255));
   
   for(int j = 0; j < NUM_LEDS; j++)
   {
@@ -604,7 +573,7 @@ void Strip_Program_01_Handle(void)
 }
 
 /**************************************************************************************************
-Function: Strip_Program_02_Handle()
+Function: Strip_Program_02_Handle()   (Saturation, Brightmess, value)
 Argument: void
 return: void
 **************************************************************************************************/
@@ -612,13 +581,13 @@ void Strip_Program_02_Handle(void)
 {
     for(int j = 0; j < NUM_LEDS; j++)
     {
-       leds[j] = CRGB(255, 255,  255);
-       FastLED.show(); 
+       leds[j] = CHSV( color_format.hue, color_format.sat, color_format.val); 
     }
+    FastLED.show(); 
 }
 
 /**************************************************************************************************
-Function: Strip_Program_03_Handle()
+Function: Strip_Program_03_Handle()  (color setting)
 Argument: void
 return: void
 **************************************************************************************************/
@@ -628,20 +597,6 @@ void Strip_Program_03_Handle(void)
     {
        //leds[j] = CRGB( Color_Val_R, Color_Val_G, Color_Val_B);  //red and green are swapped ???
        leds[j] = CRGB( Color_Val_B, Color_Val_R, Color_Val_G); 
-    }
-    FastLED.show(); 
-}
-
-/**************************************************************************************************
-Function: Strip_Program_04_Handle()
-Argument: void
-return: void
-**************************************************************************************************/
-void Strip_Program_04_Handle(void)
-{
-    for(int j = 0; j < NUM_LEDS; j++)
-    {
-       leds[j] = CHSV( color_format.hue, color_format.sat, color_format.val); 
     }
     FastLED.show(); 
 }
