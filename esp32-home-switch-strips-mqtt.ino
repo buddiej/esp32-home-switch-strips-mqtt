@@ -35,7 +35,7 @@
 #define TOPIC_STRIP_1_STATUS_GET_ON           "wz/strip_1/status/get/on"
 
 /* LED STRIPS */
-#define NUM_LEDS 100
+#define NUM_LEDS 300
 #define DATA_PIN 26
 #define DATA_MIC_INPUT A0
 
