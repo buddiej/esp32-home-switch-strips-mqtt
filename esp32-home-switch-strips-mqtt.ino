@@ -224,7 +224,8 @@ void setup()
     when client received subscribed topic */
   client.setCallback(receivedCallback);
   
-  FastLED.addLeds<WS2811, DATA_PIN, RGB>(leds, NUM_LEDS);
+  //FastLED.addLeds<WS2811, DATA_PIN, RGB>(leds, NUM_LEDS);
+  FastLED.addLeds<WS2811, DATA_PIN, BRG>(leds, NUM_LEDS);
   //fft
   randomSeed(98155);
   //smoothing
@@ -602,8 +603,8 @@ void Strip_Program_03_Handle(void)
 {
     for(int j = 0; j < NUM_LEDS; j++)
     {
-       //leds[j] = CRGB( Color_Val_R, Color_Val_G, Color_Val_B);  //red and green are swapped ???
-       leds[j] = CRGB( Color_Val_B, Color_Val_R, Color_Val_G); 
+       leds[j] = CRGB( Color_Val_R, Color_Val_G, Color_Val_B);
+       //leds[j] = CRGB( Color_Val_B, Color_Val_R, Color_Val_G); 
     }
     FastLED.show(); 
 }
